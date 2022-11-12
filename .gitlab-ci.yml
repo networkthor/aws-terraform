@@ -11,10 +11,10 @@ stages:
 terraform-dev:
   stage: dev
   variables:
-    TF_ENV_PATH: infra/terraform/projectA/dev
-  image:
-    name: hashicorp/terraform:light
-  script:
-  - cd $TF_ENV_PATH
-  - terraform --version
-  - terraform init
+    TF_ENV_PATH: terraform/projectA/dev
+  trigger:
+    include:
+      - project: 'aws-terraform/templates/cicd'
+        ref: main
+        file: 'terraform.gitlab-ci.yml'
+    strategy: depend
