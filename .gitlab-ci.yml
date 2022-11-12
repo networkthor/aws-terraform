@@ -14,7 +14,7 @@ terraform-dev:
     TF_ENV_PATH: terraform/projectA/dev
   trigger:
     include:
-      - project: 'templates/cicd'
+      - project: 'aws-terraform4/templates/cicd'
         ref: main
         file: 'terraform.gitlab-ci.yml'
     strategy: depend
