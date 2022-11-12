@@ -12,6 +12,7 @@ terraform-dev:
   stage: dev
   variables:
     TF_ENV_PATH: terraform/projectA/dev
+    AWS_DEFAULT_REGION: eu-central-1
   trigger:
     include:
       - project: 'aws-terraform4/templates/cicd'
