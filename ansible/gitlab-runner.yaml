@@ -1,0 +1,55 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: download gitlab-runner binary
+      get_url:
+        url: https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64
+        dest: /usr/local/sbin/gitlab-runner 
+        mode: '0555'
+
+    - name: add the user 'gitlab-runner', appending the group 'wheel' to the user's groups
+      user:
+        name: gitlab-runner
+        shell: /bin/bash
+        groups: sudo, docker
+        append: yes
+        home: /data/gitlab-runner
+    
+    - name: check that the gitlab-runner binary exists
+      stat:
+        path: /usr/local/sbin/gitlab-runner
+      register: runner
+
+    - name: check that the gitlab-runner service exists
+      stat:
+        path: /etc/systemd/system/gitlab-runner.service
+      register: service
+
+    - name: enable linger for gitlab-runner
+      command: loginctl enable-linger gitlab-runner
+
+    - name: gitlab-runner installation
+      command: /usr/local/sbin/gitlab-runner install --user=gitlab-runner --working-directory=/data/gitlab-runner
+      when: runner.stat.exists and not service.stat.exists
+
+    - name: start gitlab-runner
+      command: /usr/local/sbin/gitlab-runner start
+
+    - name: register shell runner
+      shell: |
+        /usr/local/sbin/gitlab-runner register \
+        --non-interactive \
+        --url "https://gitlab.com/" \
+        --name AWS-Docker-Shell \
+        --registration-token XXXXXXYYYYYYZZZZZZ \
+        --executor "shell" \
+        --tag-list aws-docker-shell \
+        --run-untagged="false" \
+        --locked="false" \
+        --access-level="not_protected"
+    
+    - name: remove bash_logout for gitlab-runner user
+      file:
+        path: /data/gitlab-runner/.bash_logout
+        state: absent 

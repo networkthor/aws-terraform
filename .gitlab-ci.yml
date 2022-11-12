@@ -1,0 +1,20 @@
+stages:
+  - dev
+  - staging
+  - production
+
+##
+## Child pipeline
+## Job: Terraform main pipeline: Init, validate, fmt, plan and apply
+## Env: Dev
+##
+terraform-dev:
+  stage: dev
+  variables:
+    TF_ENV_PATH: infra/terraform/projectA/dev
+  image:
+    name: hashicorp/terraform:light
+  script:
+  - cd $TF_ENV_PATH
+  - terraform --version
+  - terraform init
